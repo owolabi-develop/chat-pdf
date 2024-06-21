@@ -1,0 +1,21 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+.venv
+/chatpdf/__pycache__
+=======
+chatpdf/__pycache__
+>>>>>>> 4245e2e (add sqlite3 to gitignore file)
+=======
+__pycache__
+>>>>>>> 546d199 (updated javascript function to retain navbar pdflink when user refresh the page)
+=======
+.venv
+/chatpdf/__pycache__
+>>>>>>> cae0a96 (save)
+db.sqlite3
+=======
+db.sqlite3
+chatpdf/__pycache__
+>>>>>>> ce659e1 (commit)

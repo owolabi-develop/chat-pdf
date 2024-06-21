@@ -1,0 +1,165 @@
+
+{% load static %}
+{# Load the tag library #}
+{% load bootstrap5 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContextData ChatPDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+   <script src="{% static 'chatpdf/chatpdf.js' %}"></script>
+   <link rel="stylesheet" href="{% static 'chatpdf/main.css' %}">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row h-100">
+          <div class="col-2 bg-dark h-100 p-0">
+            <!--upload file-->
+            <div class="fileupload w-100">
+                
+                
+
+            <form action="{% url 'chat' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                 <label for="file-upload" id="drop-area">
+                    <div id="file_loader">
+                        <div class="loader"></div> <div class="loader_text"><span>Processing...</span></div>
+                    </div>
+                <div id="droptext">
+                    <span>+ Drop New Chat</span>
+                    <br/>
+                    <span>PDF,DOCX,TXT</span>
+                </div>
+                 </label>
+
+                    <input type="file" name="pdffile" id="file-upload" hidden>
+            </form>
+        </div>
+        <!--upload file-->
+
+
+
+        <!--pdffile-->
+
+      
+        <div class="pdf_url" id="pdf_url"><!--pdfurl placeholder div--></div>
+
+
+        <!--pdffile-->
+       
+          </div>
+
+
+          <!--pdf viewer-->
+          <div class="col-5 bg-body-tertiary h-100 border-end border-3  p-0">
+            <!--pdf header-->
+            <div class="chatinput shadow bg-body-tertiary" style="height:6%; padding:5px;" >
+
+                <div id="pdf-data-name" class="pdf_data_name"></div>
+
+
+                <div class="pdf_control">
+                    <button class="btn btn-primary btn-sm " id="prev-page">&#8592;</button>
+                    <span id="page-num">0/0</span>
+                    <button class="btn btn-primary btn-sm" id="next-page">&#8594;</button>
+                    
+                    <input type="text" id="go-to-page-input">
+                    <button class="btn btn-primary btn-sm" id="go-to-page-btn">&#8645;</button>
+                    <button class="btn btn-primary btn-sm" id="zoom-in">&#43;</button>
+                    <button class="btn btn-primary btn-sm" id="zoom-out">&#8722;</button>
+                    <!-- <input class="" type="file" id="file-input" accept=".pdf"> -->
+                </div>
+                
+            </div>
+            <!--pdf header-->
+
+            <!--pdf display canvas area-->
+             <div class="chatholder p-1" style="height: 92%;overflow: hidden;">
+              
+            <div  id="pdf-container" style="width: 100%; height: 100%; overflow-y:auto; overflow-x: hidden; text-align: center;"></div>
+                
+
+           </div>
+            <!-- pdf display canvas area-->
+
+           
+          </div>
+
+          <!--pdf viewer-->
+
+
+
+           <!--chat-->
+          <div class="col-5 bg-body-tertiary p-0 " style="height: 100%;">
+
+            <div class="chatinput shadow bg-body-tertiary" style="height:6%; padding:10px;" >
+                <p>Chat</p>
+                
+            </div>
+
+            <!-- message-->
+            <div class="chatholder">
+
+
+
+                 <!--bot_Respone_message-->
+            
+                <!--bot initial document summary-->
+                <!--wait-spinner-->
+                <div class="chat-loader" id="chat-loader">
+                    <div class="loader-spinner"></div>
+                </div>
+                <!--wait-spinner-->
+                 <div id="bot-summary" class="bot_summary bot_Respone_message shadow p-3 mb-2 bg-body-tertiary rounded p-3 h-auto">
+                  
+                </div>
+               
+                <!--bot initial document summary end-->
+                <div class="bot-chat-loader" id="bot-chat-loader">
+                    <div class="bot-loader-spinner"></div>
+                </div>
+
+
+                <div id="chat-bot-reponse-holder">
+                </div>
+                <br/>
+                <div id="bot-thinking" class="bot-thinking"><div class="bot-loader-spinner"></div></div>
+               
+                <!--bot_Respone_message-->
+
+            </div>
+             <!-- message-->
+
+
+            <!-- enter input-->
+            <div class="chatinput shadow mb-5 bg-body-tertiary" style="height:8.5%; padding:15px;" >
+                <form action="" method="post" id="chat-message-submit">
+                    {% csrf_token %}
+                      <div class="input-group">
+                        <input type="text" name="message" id="chat-message" placeholder="Type your message here" required>
+                        <div class="input-group-append">
+                            <button type="submit" id="message-btn"><span>&#10147;</span></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+             <!-- enter input-->
+            
+      </div>
+      <!-- end of chat-->
+
+    
+</body>
+</html>
