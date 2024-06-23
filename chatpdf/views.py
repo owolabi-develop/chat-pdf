@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
-from .chatutils import load_pdf,summarize_all_pdf,query_pdf
+from .chatutils import load_pdf,summarize_all_pdf,rag_message
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from fpdf import FPDF
@@ -121,7 +121,7 @@ def chat(request):
             user_message = request.POST.get('message')
             print(user_message)
             if user_message:
-                bot_message = query_pdf(user_message)
+                bot_message = rag_message(user_message)
             
             # Add bot messages to session
                 request.session['chat_history'].append({'role': 'bot', 'message': bot_message})

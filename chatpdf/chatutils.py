@@ -1,38 +1,40 @@
 from langchain_pinecone import PineconeVectorStore
-from openai import OpenAI
+from langchain_openai import ChatOpenAI
 import os
 import instructor
 from pydantic import BaseModel
+from langchain import hub
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_pinecone import PineconeVectorStore
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.chains import create_history_aware_retriever
+from langchain_core.prompts import MessagesPlaceholder
+from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_core.chat_history import BaseChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from uuid import uuid4
 from langchain_community.document_loaders import (
     PyPDFLoader,
     )
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 os.environ['PINECONE_API_KEY'] = ''
-api_keys = ''
+os.environ["OPENAI_API_KEY"] = ""
 index_name = "chat"
-client = instructor.from_openai(OpenAI(api_key=api_keys))
+model = ChatOpenAI(model="gpt-3.5-turbo-0125")
 
-embeddings =OpenAIEmbeddings(api_key=api_keys)
+
+embeddings =OpenAIEmbeddings()
 text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
         chunk_overlap=200,
         length_function=len,
         is_separator_regex=False,
 )
-
-
-
-class PfdResponse(BaseModel):
-    """
-    instructor response_model class for pdf response
-    
-    """
-    text: str 
-    page: int
-    source:str
-    
-    
+ 
 
 def load_pdf(file_path):
     
@@ -43,56 +45,120 @@ def load_pdf(file_path):
     return doc
     
 
-def query_pdf(query):
-    vectorstore = PineconeVectorStore(index_name=index_name, embedding=embeddings)
-    results = vectorstore.similarity_search_with_relevance_scores(query, k=3)
-    
-    for result, _ in results:
-        source_knowledge = f"text: {result.page_content},\n Page: {result.metadata['page']}, \n Source: {result.metadata['source']}"
-        
-        resp = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            response_model=PfdResponse,
-            messages=[
-                {"role": "system", "content": "You are a pdf summarizer assistant. If does not match the query description, dont generate random once just return 'No such document'."},
-                {"role": "user", "content": f"using the text: \n {str(source_knowledge)} \n  to answer the query: {query}"}
-            ]
-        )
-     
-
-    return resp.model_dump() 
 
 
-def summarize_all_pdf(query):
-    vectorstore = PineconeVectorStore(index_name=index_name, embedding=embeddings)
-    results = vectorstore.similarity_search_with_relevance_scores(query, k=3)
-    
-    for result, _ in results:
-        source_knowledge = f"text: {result.page_content},\n Page: {result.metadata['page']}"
-        
-        resp = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            response_model=PfdResponse,
-            messages=[
-                {"role": "system", "content": "You are a pdf summarizer assistant. If query doesnt match the pdf. dont generate random once just return 'No such document'."},
-                {"role": "user", "content": f"using the text: \n {str(source_knowledge)} \n  to answer the query: {query} then return a message such as Hello and welcome to this insightful PDF file following with the main summary of what the pdf document is all about "}
-            ]
-        )
-        
-        print(resp.model_dump())
-     
 
-    return resp.model_dump() 
-    
-    
-    
-    
-        
-    
-    
-    
-# res = query_pdf('management to enable dietary freedom in people with type')
 
-# res
+
+## conversation rag script
+
+
+## retrieve the document from pinecone vector db
+vectorstore = PineconeVectorStore(index_name=index_name, embedding=OpenAIEmbeddings())
+retriever = vectorstore.as_retriever(search_type="similarity",search_kwargs={'k': 1})
+
+### Contextualize question ###
+contextualize_q_system_prompt = (
+    "Given a chat history and the latest user question "
+    "which might reference context in the chat history, "
+    "formulate a standalone question which can be understood "
+    "without the chat history. Do NOT answer the question, "
+    "just reformulate it if needed and otherwise return it as is."
+)
+contextualize_q_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", contextualize_q_system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+)
+history_aware_retriever = create_history_aware_retriever(
+    model,retriever, contextualize_q_prompt
+)
+
+
+system_prompt = (
+    "You are an assistant for question-answering tasks over pdf documents. "
+    "Use the following pieces of retrieved context to answer "
+    "the question. If you don't know the answer, reply to the user with something related to is question and dont return the page number "
+    "Use three sentences maximum and keep the "
+    "answer concise."
+    "\n\n"
+    "{context}"
+)
+
+qa_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+)
+question_answer_chain = create_stuff_documents_chain(model, qa_prompt)
+
+rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+
+
+### Statefully manage chat history ###
+store = {}
+
+
+
+def get_session_history(session_id: str) -> BaseChatMessageHistory:
+    if session_id not in store:
+        store[session_id] = ChatMessageHistory()
+    return store[session_id]
+
+
+conversational_rag_chain = RunnableWithMessageHistory(
+    rag_chain,
+    get_session_history,
+    input_messages_key="input",
+    history_messages_key="chat_history",
+    output_messages_key="answer",
+)
+
+
+def rag_message(input):
+    response = conversational_rag_chain.invoke(
+    {"input":input},
+    config={
+        "configurable": {"session_id": uuid4()}
+    },  # constructs a key "abc123" in `store`.
+)
+    
+    return dict(text=response['answer'],page=int(response['context'][0].metadata['page']),source=response['context'][0].metadata['source'])
+
+
+
+ ## summarize the uploaded document
+def summarize_all_pdf(input):
+   
+    summarize_system_prompt = (
+        "You are an assistant for summarizing tasks over pdf documents."
+        "Use the following pieces of retrieved context give to you and summarize the whole of it"
+        "and then return summary"
+        "\n\n"
+        "{context}"
+    )
+
+    summary_prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", summarize_system_prompt),
+            ("human", "{input}"),
+        ]
+    )
+
+
+    question_answer_chain = create_stuff_documents_chain(model, summary_prompt)
+    rag_chain = create_retrieval_chain(retriever, question_answer_chain)
+
+    response = rag_chain.invoke({"input":input})
+    return  dict(text=response["answer"])
+
+
+
+    
+    
 
     
