@@ -322,7 +322,8 @@ $(document).ready(function() {
             },
             error: function(xhr, status, error) {
                  // Handle error response
-                alert('Error uploading file. Could not read pdf');               
+                alert('Error uploading file. Could not read pdf'); 
+                window.location.reload()              
             }
         });
         
@@ -401,6 +402,7 @@ $(document).ready(function() {
             error: function(xhr, status, error) {
                 // Handle error response
                 alert('Error sending message');
+                window.location.reload()
             }
         });
     });

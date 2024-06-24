@@ -137,7 +137,7 @@ def summarize_all_pdf(input):
     summarize_system_prompt = (
         "You are an assistant for summarizing tasks over pdf documents."
         "Use the following pieces of retrieved context give to you and summarize the whole of it"
-        "and then return summary"
+        "and then return an answer say this document is talk about the related summary with the headline propbably the document title on the first page "
         "\n\n"
         "{context}"
     )
