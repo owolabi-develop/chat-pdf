@@ -76,6 +76,7 @@ langchain-core==0.2.2
 langchain-openai==0.1.8
 langchain-pinecone==0.1.1
 langchain-text-splitters==0.2.0
+langchainhub==0.1.20
 langgraph==0.0.69
 langserve==0.2.2
 langsmith==0.1.64
@@ -150,6 +151,7 @@ sse-starlette==1.8.2
 stack-data==0.6.3
 starlette==0.37.2
 sympy==1.12.1
+tavily-python==0.3.3
 tenacity==8.3.0
 termcolor==2.4.0
 tiktoken==0.7.0
@@ -159,6 +161,7 @@ tornado==6.4
 tqdm==4.66.4
 traitlets==5.14.3
 typer==0.12.3
+types-requests==2.32.0.20240602
 typing-inspect==0.9.0
 typing_extensions==4.12.0
 tzdata==2024.1
