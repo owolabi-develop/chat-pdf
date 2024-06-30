@@ -8,7 +8,6 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_pinecone import PineconeVectorStore
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import create_history_aware_retriever
 from langchain_core.prompts import MessagesPlaceholder
@@ -37,10 +36,14 @@ text_splitter = RecursiveCharacterTextSplitter(
  
 
 def load_pdf(file_path):
-    
     loader = PyPDFLoader(file_path)
     doc = text_splitter.split_documents(loader.load())
-    print(".....embedding to pincone")
+    # Check if page number is 0 and increment if needed
+    for docs in doc:
+        if 'page' in docs.metadata and docs.metadata['page'] == 0:
+            docs.metadata['page'] += 1
+    
+    print("Embedding to Pinecone:")
     vectostore = PineconeVectorStore.from_documents(doc, embeddings, index_name=index_name)
     return doc
     
