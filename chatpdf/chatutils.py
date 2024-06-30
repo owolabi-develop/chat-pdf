@@ -21,8 +21,8 @@ from langchain_community.document_loaders import (
     )
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
-os.environ['PINECONE_API_KEY'] = ''
-os.environ["OPENAI_API_KEY"] = ""
+os.environ['PINECONE_API_KEY'] = ""
+os.environ["OPENAI_API_KEY"] = ''
 index_name = "chat"
 model = ChatOpenAI(model="gpt-3.5-turbo-0125")
 
