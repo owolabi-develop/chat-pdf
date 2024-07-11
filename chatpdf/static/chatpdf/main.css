@@ -1,6 +1,5 @@
 .pdf_fileholder{
-    margin: 5px; 
-    padding: 10px 5px; 
+    padding: 5px 5px; 
     overflow-wrap: break-word;
     cursor: pointer;
     text-align: justify;
@@ -8,23 +7,45 @@
     border-radius: 10px;
     color: white;
     list-style: none;
+    background-color: #3378f0;
 }
 
 .fileupload{
-    padding: 10px;
-    margin-top: 20px;
+    padding: 8px;
+    margin-top: 30px;
     color: aqua;
 }
 
 .pdf_url{
     padding: 5px 1px;
-    
+    height: 260px;
+    overflow-y:auto;
+
 }
 .pdf_url ul{
     padding: 0px;
     margin: 0px;
 }
 
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
 
 
 .pdf_url_div {
@@ -276,3 +297,83 @@
   @keyframes l7 {to{transform: rotate(.5turn)}}
   
 /* waite message spinner*/
+
+
+
+.chat_history{
+  overscroll-behavior: smooth;
+  color: whitesmoke;
+}
+
+.chat_history span{
+ 
+  padding: 10px 0px 0px 10px;
+  font-weight: bold;
+
+}
+
+
+.chat_history .create_session{
+   height: 70px;
+   overscroll-behavior: smooth;
+   text-align: center;
+   padding: 8px;
+
+}
+
+
+.chat_history .create_session button{
+ padding: 8px 15px;
+ width: 200px;
+ border: none;
+ border-radius: 5px;
+ outline: none;
+ color: whitesmoke;
+ background-color: #3378f0;
+
+}
+
+
+.chat_history .chat_session{
+  height: 225px;
+  overflow-y:auto;
+  overscroll-behavior: smooth;
+  text-align: center;
+
+}
+
+.chat_history .chat_session .session_holder{
+  background-color: #888;
+  margin: 5px;
+  justify-content: center;
+  border-radius: 5px;
+  color: whitesmoke;
+  padding: 10px;
+  display: flex;
+}
+
+.chat_history .chat_session .session_holder a{
+ text-decoration: none;
+  color: whitesmoke;
+}
+
+.chat_history .chat_session .session_holder:hover{
+ background-color: #555;
+ }
+
+
+ .chat_history .chat_session .session_holder div{
+  margin: 2px;
+  padding: 5px;
+  }
+
+  .chat_history .chat_session .session_holder .delete_btn i{
+    margin: 2px;
+    padding: 5px;
+    cursor: pointer;
+    }
+
+
+    .chat_history .chat_session .session_holder .delete_btn i:hover{
+      color: rgb(152, 4, 4);
+      }

@@ -130,3 +130,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+
+
+LOGIN_URL = "login"
+
+LOGOUT_URL = "logout"
+
+LOGIN_REDIRECT_URL = "/chat"
+
+LOGOUT_REDIRECT_URL = "login"
+

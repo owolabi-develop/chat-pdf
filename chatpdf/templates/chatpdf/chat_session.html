@@ -20,6 +20,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
    <script src="{% static 'chatpdf/chatpdf.js' %}"></script>
    <link rel="stylesheet" href="{% static 'chatpdf/main.css' %}">
+   <script src="https://kit.fontawesome.com/18de66c05e.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div class="container-fluid">
@@ -29,7 +30,6 @@
             <!--chat_history-->
 
             <div class="chat_history" id="chat_history">
-
                 <!--create_session button-->
                 <div class="create_session">
                     <form action="{% url 'create-session' %}" method="post">
@@ -40,15 +40,69 @@
 
                 </div>
 
-
-                <!--create_session button-->
                 
+                <!--create_session button-->
+                <span>Previous chat</span>
+                
+                <!--chat_history-->
+                <div class="chat_session">
+                    {% if sessions %}
+                    {% for session in sessions %}
+                    <div class="session_holder" id="session_holder">
+
+                        <div class="session_text"><a href="{% url "chat-session" session %}">{{session|truncatechars:25 }}</a></div>
+                        <div class="delete_btn"><a href="{% url "delete-session" session %}"><i class="fa-solid fa-trash"></i></a></div>
+                    
+                    </div>
+                    
+                    {% endfor %}
+                    {% else %}
+                    <p></p>
+
+                    {% endif %}
+                
+                   
+
+                </div>
+                <!--chat_history-->
 
             </div>
 
             <!--chat history-->
 
+
+
+            <!--upload file-->
+            <div class="fileupload w-100">
+                
+                
+                {% if current_session %}
+            <form action="{% url "formupload" current_session %}" method="post" id="form-upload" enctype="multipart/form-data">
+                {% csrf_token %}
+                 <label for="file-upload" id="drop-area">
+                    <div id="file_loader">
+                        <div class="loader"></div> <div class="loader_text"><span>Processing...</span></div>
+                    </div>
+                <div id="droptext">
+                    <span>+ Drop New Chat</span>
+                    <br/>
+                    <span>PDF,DOCX,TXT</span>
+                </div>
+                 </label>
+
+                    <input type="file" name="pdffile" id="file-upload" hidden>
+                    <input type="hidden" id="current_session" name="session" value="{{current_session}}">
+            </form>
+
+            {% else %}
+
             
+            {% endif %}
+            
+
+        </div>
+        <!--upload file-->
+
 
         <!--pdffile-->
 

@@ -258,6 +258,7 @@ $(document).ready(function() {
         /// get the file and crf_token
         let pdffile = this.files[0];
         let csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+        let current_session = $('#current_session').val();
 
         let formdata = new FormData();
         // append the file and crf_token to formdata
@@ -272,14 +273,12 @@ $(document).ready(function() {
         document.getElementById('file_loader').style.display = "block";
 
         /// waiting for bot response
-        document.getElementById('chat-loader').style.display = "block";
-
-        
+        document.getElementById('chat-loader').style.display = "block";    
         
 
         /// send file upload the ajax request
          $.ajax({
-            url: 'formupload/',  
+            url: $('#form-upload').attr('action'),  
             type: 'POST',
             data: formdata,
             processData: false,

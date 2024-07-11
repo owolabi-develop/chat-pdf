@@ -20,9 +20,12 @@ from langchain_community.document_loaders import (
     )
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
+from pinecone.grpc import PineconeGRPC as Pinecone
+from pinecone import ServerlessSpec
+
 os.environ['PINECONE_API_KEY'] = ""
 os.environ["OPENAI_API_KEY"] = ''
-index_name = "chat"
+index_names = "chat"
 model = ChatOpenAI(model="gpt-3.5-turbo-0125")
 
 
@@ -35,7 +38,7 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
  
 
-def load_pdf(file_path):
+def load_pdf(file_path,index_name):
     loader = PyPDFLoader(file_path)
     doc = text_splitter.split_documents(loader.load())
     # Check if page number is 0 and increment if needed
@@ -57,7 +60,7 @@ def load_pdf(file_path):
 
 
 ## retrieve the document from pinecone vector db
-vectorstore = PineconeVectorStore(index_name=index_name, embedding=OpenAIEmbeddings())
+vectorstore = PineconeVectorStore(index_name=index_names, embedding=OpenAIEmbeddings())
 retriever = vectorstore.as_retriever(search_type="similarity",search_kwargs={'k': 1})
 
 ### Contextualize question ###
@@ -135,8 +138,11 @@ def rag_message(input):
 
 
  ## summarize the uploaded document
-def summarize_all_pdf(input):
-   
+def summarize_all_pdf(input,index_name):
+    print("summarizing doc")
+    vectorstore = PineconeVectorStore(index_name=index_name, embedding=OpenAIEmbeddings())
+    retriever = vectorstore.as_retriever(search_type="similarity",search_kwargs={'k': 1})
+    
     summarize_system_prompt = (
         "You are an assistant for summarizing tasks over pdf documents."
         "Use the following pieces of retrieved context give to you and summarize the whole of it"
@@ -159,6 +165,38 @@ def summarize_all_pdf(input):
     response = rag_chain.invoke({"input":input})
     return  dict(text=response["answer"])
 
+
+
+## create pinecone index
+
+
+def create_pinecone_index(index_name):
+    pc = Pinecone()
+    if index_name not in pc.list_indexes().names():
+        print("Creating index...")
+        pc.create_index(
+            name=index_name,
+            dimension=1536,
+            metric="cosine",
+            spec=ServerlessSpec(
+                cloud='aws', 
+                region='us-east-1'
+            ) 
+        ) 
+        print("Index created.")
+    return index_name
+
+
+
+
+def delete_pinecone_index(index_name):
+    pc = Pinecone()
+    if index_name in pc.list_indexes().names():
+        print("Deleting index...")
+        pc.delete_index(index_name)
+        print("Index deleted.")
+    else:
+        return "Index not found."
 
 
     
