@@ -83,7 +83,7 @@
                 {% if session_doc %}
                 {% for url_docs in session_doc%}
                     <li>
-                    <div class="pdf_url_div" onclick="loadPDF('{{url_docs.document.url}}')">{{url_docs.document.url|truncatechars:22}}</div>
+                    <div class="pdf_url_div" onclick="loadPDF('{{url_docs.document.url}}')">{{url_docs.document.url|cut:"/media/uploads/"|truncatechars:22}}</div>
                     </li>
                 
                 {% endfor %}

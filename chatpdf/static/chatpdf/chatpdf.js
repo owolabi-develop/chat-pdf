@@ -189,7 +189,7 @@ function retain_pdf_link_on_sidebar(pdf_url_name){
         <ul>
                 <li>
                 <div class="pdf_url_div" onclick="loadPDF('${pdf_url_name[i]}')">
-                ${pdf_url_name[i]}</div>
+                ${pdf_url_name[i].replace('/media/uploads/','').slice(0,20)}</div>
                 </li>
         </ul>
         `
@@ -206,7 +206,7 @@ function startTypewriterEffect(botResponse, elementId) {
 
     function type() {
       const currentText = botResponse.slice(0, index);
-      document.getElementById(elementId).innerHTML = currentText;
+      document.getElementById(elementId).textContent = currentText;
       index++;
 
       if (index <= botResponse.length) {
@@ -216,6 +216,8 @@ function startTypewriterEffect(botResponse, elementId) {
 
     type(); // Start typing initially
   }
+
+
 ///   bot typewriting effect function for user messsage and bot response
   function bot_startTypewriterEffect(botResponse, elementId) {
     let index = 0; 
@@ -304,8 +306,6 @@ $(document).ready(function() {
                 // handle pdf bot_summary initial message
                 pdf_bot_summary = response['bot_summary']
                 console.log("arrayMes:",pdf_bot_summary)
-                new_summary = response['bot_summary']
-                console.log("new messages",new_summary)
                 document.getElementById('chat-loader').style.display ="none";
                 // document.getElementById('bot-summary').style.display ="block";
                
