@@ -14,41 +14,41 @@ function loadPdf_document() {
     const zoomInBtn = document.getElementById('zoom-in');
     const pdf_data_name = document.getElementById('pdf-data-name'); 
     
-    /// check for any save pdf links on localstorage a render it back to navbar
+//     /// check for any save pdf links on localstorage a render it back to navbar
    
-    pdf_urls =  localStorage.getItem('pdf_urls')
-    if (pdf_urls && pdf_urls.length > 0){
-        pdf_url = pdf_urls.split(',')
+//     pdf_urls =  localStorage.getItem('pdf_urls')
+//     if (pdf_urls && pdf_urls.length > 0){
+//         pdf_url = pdf_urls.split(',')
     
-        let pdfurl_content = ""
-        for(let i=0; i < pdf_url.length; i++){
-        console.log(pdf_url[i])
-        pdfurl_content +=`
-        <ul>
-                <li>
-                <div class="pdf_url_div" onclick="loadPDF('${pdf_url[i]}')">
-                ${pdf_url[i].replace('/media/','').slice(0,20)}</div>
-                </li>
-        </ul>
-        `
-        }
+//         let pdfurl_content = ""
+//         for(let i=0; i < pdf_url.length; i++){
+//         console.log(pdf_url[i])
+//         pdfurl_content +=`
+//         <ul>
+//                 <li>
+//                 <div class="pdf_url_div" onclick="loadPDF('${pdf_url[i]}')">
+//                 ${pdf_url[i].replace('/media/','').slice(0,20)}</div>
+//                 </li>
+//         </ul>
+//         `
+//         }
 
-    document.getElementById('pdf_url').innerHTML = pdfurl_content;
+//     document.getElementById('pdf_url').innerHTML = pdfurl_content;
    
-}else{
-    document.getElementById('pdf_url').innerHTML = ``;
-}
+// }else{
+   
+// }
  // / check for any save pdf links on localstorage a render it back to navbar
 
-// check for new _summary message in localstorage
-if (localStorage.getItem('new_summary')){
-    document.getElementById('chat-loader').style.display ="none";
-    document.getElementById('bot-summary').style.display ="block";
-    document.getElementById('bot-summary').innerHTML = localStorage.getItem('new_summary');
-}else{
-    document.getElementById('bot-summary').innerHTML = '';
-}
-// / check for new _summary message in localstorage 
+// // check for new _summary message in localstorage
+// if (localStorage.getItem('new_summary')){
+//     document.getElementById('chat-loader').style.display ="none";
+//     document.getElementById('bot-summary').style.display ="block";
+//     document.getElementById('bot-summary').innerHTML = localStorage.getItem('new_summary');
+// }else{
+//     document.getElementById('bot-summary').innerHTML = '';
+// }
+// // / check for new _summary message in localstorage 
 
 
 
@@ -92,8 +92,8 @@ if (localStorage.getItem('new_summary')){
         await renderAllPages();
         pdf_data_name.textContent = url.replace('/media/','');
 
-        // Store PDF URL in session
-        localStorage.setItem('pdfURL', url);
+        // // Store PDF URL in session
+        // localStorage.setItem('pdfURL', url);
     }
     window.loadPDF = loadPDF;
 
@@ -183,13 +183,13 @@ function retain_pdf_link_on_sidebar(pdf_url_name){
 
     // loop through uploaded files
     for (let i = 0; i < pdf_url_name.length; i++) {
-        urlarray.push(pdf_url_name[i].pdf_upload)
+        urlarray.push(pdf_url_name[i])
         localStorage.setItem("pdf_urls",urlarray)
         pdfurl_content +=`
         <ul>
                 <li>
-                <div class="pdf_url_div" onclick="loadPDF('${pdf_url_name[i].pdf_upload}')">
-                ${pdf_url_name[i].pdf_upload.replace('/media/','').slice(0,20)}</div>
+                <div class="pdf_url_div" onclick="loadPDF('${pdf_url_name[i]}')">
+                ${pdf_url_name[i]}</div>
                 </li>
         </ul>
         `
@@ -206,7 +206,7 @@ function startTypewriterEffect(botResponse, elementId) {
 
     function type() {
       const currentText = botResponse.slice(0, index);
-      document.getElementById(elementId).textContent = currentText;
+      document.getElementById(elementId).innerHTML = currentText;
       index++;
 
       if (index <= botResponse.length) {
@@ -251,14 +251,14 @@ $(document).ready(function() {
          document.getElementById('message-btn').style.cursor = "not-allowed";
 
 
-        document.getElementById('bot-summary').innerHTML='';
-        document.getElementById('bot-summary').style.display ="none";
+        // document.getElementById('bot-summary').innerHTML='';
+        // document.getElementById('bot-summary').style.display ="none";
         document.getElementById('chat-bot-reponse-holder').innerHTML ='';
         localStorage.clear()
         /// get the file and crf_token
         let pdffile = this.files[0];
         let csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
-        let current_session = $('#current_session').val();
+
 
         let formdata = new FormData();
         // append the file and crf_token to formdata
@@ -288,6 +288,7 @@ $(document).ready(function() {
                
                 pdf_url_name = response['uploaded_files']
                 console.log("file",pdf_url_name)
+
                 retain_pdf_link_on_sidebar(pdf_url_name)
                 
                  /// show upload progress bar
@@ -295,23 +296,23 @@ $(document).ready(function() {
                  document.getElementById('droptext').style.display = "block";
                  // enable the upload button
                  document.getElementById('file-upload').disabled = false
-                
+
+                console.log(response['uploaded_files'][response['uploaded_files'].length - 1])
                 // get the pdf file name from response and load it in the pdf viewer
-                loadPDF(response['uploaded_files'][response['uploaded_files'].length - 1]['pdf_upload'])
+                loadPDF(response['uploaded_files'][response['uploaded_files'].length - 1])
 
                 // handle pdf bot_summary initial message
-                pdf_bot_summary =response['bot_summary']
+                pdf_bot_summary = response['bot_summary']
                 console.log("arrayMes:",pdf_bot_summary)
-                new_summary = pdf_bot_summary[pdf_bot_summary.length - 1]
-
-                localStorage.setItem('new_summary',new_summary['summary'])
-
+                new_summary = response['bot_summary']
                 console.log("new messages",new_summary)
                 document.getElementById('chat-loader').style.display ="none";
-                document.getElementById('bot-summary').style.display ="block";
+                // document.getElementById('bot-summary').style.display ="block";
                
                  // handle pdf bot_summary initial message
-                startTypewriterEffect(new_summary['summary'], 'bot-summary');
+                startTypewriterEffect(new_summary, 'bot-summary');
+               
+                
 
                 // enable send message button
                 document.getElementById('message-btn').disabled = false
@@ -362,7 +363,7 @@ $(document).ready(function() {
         document.getElementById('chat-message').value = "";
 
         $.ajax({
-            url: '/chat/',
+            url: $('#chat-message-submit').attr('action'),
             type: 'POST',
             data: {
                 'message': message,
@@ -380,22 +381,22 @@ $(document).ready(function() {
                 //window.location.reload()
                 // Handle success response
                
-                bot_response_message_text = response['chat_history'][response['chat_history'].length - 1]['message']['text']
-                bot_response_message_page = response['chat_history'][response['chat_history'].length - 1]['message']['page']
+                // bot_response_message_text = response['chat_history'][response['chat_history'].length - 1]['message']['text']
+                // bot_response_message_page = response['chat_history'][response['chat_history'].length - 1]['message']['page']
               
-                const newMessageId = `bot_response_message_${Date.now()}`;
-                document.getElementById('chat-bot-reponse-holder').innerHTML +=`               
-                         <div id="${newMessageId}" class="bot_Respone_message shadow p-3 mb-2 bg-body-tertiary rounded p-3 h-auto d-inline-block">
+                // const newMessageId = `bot_response_message_${Date.now()}`;
+                // document.getElementById('chat-bot-reponse-holder').innerHTML +=`               
+                //          <div id="${newMessageId}" class="bot_Respone_message shadow p-3 mb-2 bg-body-tertiary rounded p-3 h-auto d-inline-block">
                           
-                        </div>
+                //         </div>
                     
-                `;
-                bot_chat_response = ` <p>${bot_response_message_text}</p>
-                   <div onclick="scroll_to_page('${bot_response_message_page}')" class="scroll_to_page style="width:auto;">
-                    <p>${bot_response_message_page}</p>
-                    </div>`
+                // `;
+                // bot_chat_response = ` <p>${bot_response_message_text}</p>
+                //    <div onclick="scroll_to_page('${bot_response_message_page}')" class="scroll_to_page style="width:auto;">
+                //     <p>${bot_response_message_page}</p>
+                //     </div>`
 
-                bot_startTypewriterEffect(bot_chat_response,newMessageId)
+                // bot_startTypewriterEffect(bot_chat_response,newMessageId)
                    
             },
             error: function(xhr, status, error) {

@@ -1,0 +1,43 @@
+
+{% load static %}
+{# Load the tag library #}
+{% load bootstrap5 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Session</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+   <script src="{% static 'chatpdf/chatpdf.js' %}"></script>
+   <link rel="stylesheet" href="{% static 'chatpdf/main.css' %}">
+   <script src="https://kit.fontawesome.com/18de66c05e.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div class="create_chat_session">
+       
+        <form action="{% url "create-session" %}" method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="fieldWrapper">
+                {{ form.name.errors }}
+                <label for="{{ form.subject.id_for_label }}">Description:</label>
+                <br/>
+                {{ form.name }}
+            </div>
+            <button type="submit">Create Session</button>
+        </form>
+    </div>
+    
+</body>
+</html>

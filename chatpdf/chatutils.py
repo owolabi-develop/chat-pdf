@@ -25,7 +25,7 @@ from pinecone import ServerlessSpec
 
 os.environ['PINECONE_API_KEY'] = ""
 os.environ["OPENAI_API_KEY"] = ''
-index_names = "chat"
+
 model = ChatOpenAI(model="gpt-3.5-turbo-0125")
 
 
@@ -56,53 +56,8 @@ def load_pdf(file_path,index_name):
 
 
 
-## conversation rag script
 
 
-## retrieve the document from pinecone vector db
-vectorstore = PineconeVectorStore(index_name=index_names, embedding=OpenAIEmbeddings())
-retriever = vectorstore.as_retriever(search_type="similarity",search_kwargs={'k': 1})
-
-### Contextualize question ###
-contextualize_q_system_prompt = (
-    "Given a chat history and the latest user question "
-    "which might reference context in the chat history, "
-    "formulate a standalone question which can be understood "
-    "without the chat history. Do NOT answer the question, "
-    "just reformulate it if needed and otherwise return it as is."
-)
-contextualize_q_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", contextualize_q_system_prompt),
-        MessagesPlaceholder("chat_history"),
-        ("human", "{input}"),
-    ]
-)
-history_aware_retriever = create_history_aware_retriever(
-    model,retriever, contextualize_q_prompt
-)
-
-
-system_prompt = (
-    "You are an assistant for question-answering tasks over pdf documents. "
-    "Use the following pieces of retrieved context to answer "
-    "the question. If you don't know the answer, reply to the user with something related to is question and dont return the page number "
-    "Use three sentences maximum and keep the "
-    "answer concise."
-    "\n\n"
-    "{context}"
-)
-
-qa_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", system_prompt),
-        MessagesPlaceholder("chat_history"),
-        ("human", "{input}"),
-    ]
-)
-question_answer_chain = create_stuff_documents_chain(model, qa_prompt)
-
-rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
 
 
 ### Statefully manage chat history ###
@@ -116,20 +71,71 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
     return store[session_id]
 
 
-conversational_rag_chain = RunnableWithMessageHistory(
+
+
+
+def rag_message(input,index_names):
+    
+    ## conversation rag script
+
+
+    ## retrieve the document from pinecone vector db
+    
+    vectorstore = PineconeVectorStore(index_name=index_names, embedding=OpenAIEmbeddings())
+    retriever = vectorstore.as_retriever(search_type="similarity",search_kwargs={'k': 1})
+
+### Contextualize question ###
+    contextualize_q_system_prompt = (
+        "Given a chat history and the latest user question "
+        "which might reference context in the chat history, "
+        "formulate a standalone question which can be understood "
+        "without the chat history. Do NOT answer the question, "
+        "just reformulate it if needed and otherwise return it as is."
+    )
+    contextualize_q_prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", contextualize_q_system_prompt),
+            MessagesPlaceholder("chat_history"),
+            ("human", "{input}"),
+        ]
+    )
+    history_aware_retriever = create_history_aware_retriever(
+        model,retriever, contextualize_q_prompt
+    )
+
+
+    system_prompt = (
+        "You are an assistant for question-answering tasks over pdf documents. "
+        "Use the following pieces of retrieved context to answer "
+        "the question. If you don't know the answer, reply to the user with something related to is question and dont return the page number "
+        "Use three sentences maximum and keep the "
+        "answer concise."
+        "\n\n"
+        "{context}"
+    )
+
+    qa_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+)
+    question_answer_chain = create_stuff_documents_chain(model, qa_prompt)
+
+    rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+    
+    conversational_rag_chain = RunnableWithMessageHistory(
     rag_chain,
     get_session_history,
     input_messages_key="input",
     history_messages_key="chat_history",
     output_messages_key="answer",
 )
-
-
-def rag_message(input):
     response = conversational_rag_chain.invoke(
     {"input":input},
     config={
-        "configurable": {"session_id": uuid4()}
+        "configurable": {"session_id":index_names}
     },  # constructs a key "abc123" in `store`.
 )
     

@@ -26,52 +26,6 @@
     <div class="container-fluid">
         <div class="row h-100">
           <div class="col-2 bg-dark h-100 p-0">
-
-            <!--chat_history-->
-
-            <div class="chat_history" id="chat_history">
-                <!--create_session button-->
-                <div class="create_session">
-                    <form action="{% url 'create-session' %}" method="post">
-                        {% csrf_token %}
-                    <button type="submit" id="chat_history_btn">New Session</button>
-
-                </form>
-
-                </div>
-
-                
-                <!--create_session button-->
-                <span>Previous chat</span>
-                
-                <!--chat_history-->
-                <div class="chat_session">
-                    {% if sessions %}
-                    {% for session in sessions %}
-                    <div class="session_holder" id="session_holder">
-
-                        <div class="session_text"><a href="{% url "chat-session" session %}">{{session|truncatechars:25 }}</a></div>
-                        <div class="delete_btn"><a href="{% url "delete-session" session %}"><i class="fa-solid fa-trash"></i></a></div>
-                    
-                    </div>
-                    
-                    {% endfor %}
-                    {% else %}
-                    <p></p>
-
-                    {% endif %}
-                
-                   
-
-                </div>
-                <!--chat_history-->
-
-            </div>
-
-            <!--chat history-->
-
-
-
             <!--upload file-->
             <div class="fileupload w-100">
                 
@@ -96,6 +50,23 @@
 
             {% else %}
 
+            <form action="" method="post" id="form-upload" enctype="multipart/form-data">
+                {% csrf_token %}
+                 <label for="file-upload" id="drop-area">
+                    <div id="file_loader">
+                        <div class="loader"></div> <div class="loader_text"><span>Processing...</span></div>
+                    </div>
+                <div id="droptext">
+                    <span>+ Drop New Chat</span>
+                    <br/>
+                    <span>PDF,DOCX,TXT</span>
+                </div>
+                 </label>
+
+                    <input type="file" name="pdffile" id="file-upload" hidden>
+                    <input type="hidden" id="current_session" name="session" value="{{current_session}}">
+            </form>
+
             
             {% endif %}
             
@@ -107,7 +78,19 @@
         <!--pdffile-->
 
       
-        <div class="pdf_url" id="pdf_url"></div>
+        <div class="pdf_url" id="pdf_url">
+            <ul>
+                {% if session_doc %}
+                {% for url_docs in session_doc%}
+                    <li>
+                    <div class="pdf_url_div" onclick="loadPDF('{{url_docs.document.url}}')">{{url_docs.document.url|truncatechars:22}}</div>
+                    </li>
+                
+                {% endfor %}
+               
+                {% endif %}
+        </ul>
+        </div>
 
 
         <!--pdffile-->
@@ -175,9 +158,17 @@
                     <div class="loader-spinner"></div>
                 </div>
                 <!--wait-spinner-->
-                 <div id="bot-summary" class="bot_summary bot_Respone_message shadow p-3 mb-2 bg-body-tertiary rounded p-3 h-auto">
+                {% if ai_doc_summary %}
+                 <div id="bot-summary" class="bot_summary bot_Respone_message shadow p-3 mb-2 bg-body-tertiary rounded p-3 h-auto" style="display: block;">
+                    {{ai_doc_summary}}
+                    <p>hello</p>
                   
                 </div>
+                {% else %}
+
+                {% comment %} <div id="bot-summary" class="bot_summary bot_Respone_message shadow p-3 mb-2 bg-body-tertiary rounded p-3 h-auto" style="display:none;"></div> {% endcomment %}
+
+                {% endif %}
                
                 <!--bot initial document summary end-->
                 <div class="bot-chat-loader" id="bot-chat-loader">
@@ -198,6 +189,17 @@
 
             <!-- enter input-->
             <div class="chatinput shadow mb-5 bg-body-tertiary" style="height:8.5%; padding:15px;" >
+                {% if current_session %}
+                <form action="{% url "chat" current_session %}" method="post" id="chat-message-submit">
+                    {% csrf_token %}
+                      <div class="input-group">
+                        <input type="text" name="message" id="chat-message" placeholder="Type your message here" required>
+                        <div class="input-group-append">
+                            <button type="submit" id="message-btn"><span>&#10147;</span></button>
+                        </div>
+                    </div>
+                </form>
+                {% else %}
                 <form action="" method="post" id="chat-message-submit">
                     {% csrf_token %}
                       <div class="input-group">
@@ -207,6 +209,8 @@
                         </div>
                     </div>
                 </form>
+
+                {% endif %}
             </div>
 
              <!-- enter input-->
