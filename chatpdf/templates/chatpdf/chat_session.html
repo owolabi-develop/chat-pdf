@@ -161,12 +161,10 @@
                 {% if ai_doc_summary %}
                  <div id="bot-summary" class="bot_summary bot_Respone_message shadow p-3 mb-2 bg-body-tertiary rounded p-3 h-auto" style="display: block;">
                     {{ai_doc_summary}}
-                    <p>hello</p>
-                  
                 </div>
                 {% else %}
 
-                {% comment %} <div id="bot-summary" class="bot_summary bot_Respone_message shadow p-3 mb-2 bg-body-tertiary rounded p-3 h-auto" style="display:none;"></div> {% endcomment %}
+                <div id="bot-summary" class="bot_summary bot_Respone_message shadow p-3 mb-2 bg-body-tertiary rounded p-3 h-auto" style="display:none;"></div>
 
                 {% endif %}
                
@@ -177,7 +175,34 @@
 
 
                 <div id="chat-bot-reponse-holder">
+
+                    {% if human_conversations  %}
+                    {% for human_conversation in  human_conversations %}
+
+                    {% if ai_conversations%}
+                    {% for ai_conversation in ai_conversations  %}
+                    <div id="user_message" class="user_message">
+                        <p>{{human_conversation}}</p>
+                      </div>
+                    <div id="" class="bot_Respone_message shadow p-3 mb-2 bg-body-tertiary rounded p-3 h-auto d-inline-block">
+                        <p>{{ai_conversation}}<p>
+        
+                        <div onclick="scroll_to_page('${bot_response_message_page}')" class="scroll_to_page" style="">
+                        <p>{{ai_conversation.page_number}}</p>
+                        </div>
+                  </div>
+                    
+                    {% endfor %}
+                    
+                    {% else %}
+                    {% endif %}
+
+                    {% endfor %}
+
+                    {% endif %}
+                    
                 </div>
+
                 <br/>
                 <div id="bot-thinking" class="bot-thinking"><div class="bot-loader-spinner"></div></div>
                

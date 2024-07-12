@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .forms import ChatSessionForm
+import json
 
 
 # Create your views here.
@@ -122,16 +123,15 @@ def chat(request,session_identifier):
             print(user_message)
             if user_message:
                 bot_message = rag_message(user_message,str(session))
-                ChatSessionConversation.objects.create(session=session, role='ai', content=bot_message)
+                print("bot",type(bot_message))
+                ChatSessionConversation.objects.create(session=session, role='ai', content=bot_message['text'],page_number=bot_message['page'])
             
-            human_message = [message.content for message in ChatSessionConversation.objects.filter(session=session, role='human').all()]
+            human_message = [message.content for message in ChatSessionConversation.objects.filter(session=session, role='human')]
             
-            print(human_message)
+            ai_message = [message.content for message in ChatSessionConversation.objects.filter(session=session, role='ai')]
+            print(ai_message)
             
-            ai_message = [message.content for message in ChatSessionConversation.objects.filter(session=session, role='ai').all()]
-            print(ai_message)  
-            
-            return JsonResponse( {'chat_history':{"human":human_message,"ai":ai_message}},status=200)
+            return JsonResponse( {'chat_history':{"human":human_message,"ai":bot_message}},status=200)
    
     return JsonResponse({'error': 'chat request'}, status=400)
 
@@ -159,14 +159,25 @@ def create_session(request):
 def chat_session(request, session_identifier):
     user= request.user
     session = get_object_or_404(ChatSession, session_identifier=session_identifier)
-    # conversations = ChatSessionConversation.objects.filter(session=session).order_by('created_at')
+    ai_conversations = ChatSessionConversation.objects.filter(session=session,role='ai')
+    human_conversations = ChatSessionConversation.objects.filter(session=session,role='human')
+    
+    print(":",ai_conversations)
+    
     session_docs = ChatSessionDocs.objects.filter(session=session)
     try:
         ai_doc_summary = Summary.objects.filter(session=session).latest('create_date')
-        return render(request, 'chatpdf/chat_session.html',{"current_session":session,"session_doc":session_docs,"ai_doc_summary":ai_doc_summary.summary})
+        return render(request, 'chatpdf/chat_session.html',{"current_session":session,
+                                                            "session_doc":session_docs,
+                                                            "ai_doc_summary":ai_doc_summary.summary,
+                                                            "ai_conversations":ai_conversations,
+                                                            "human_conversations":human_conversations})
     except:
         pass
-    return render(request, 'chatpdf/chat_session.html',{"current_session":session,"session_doc":session_docs})
+    return render(request, 'chatpdf/chat_session.html',{"current_session":session,
+                                                        "session_doc":session_docs,
+                                                        "ai_conversations":ai_conversations, 
+                                                        "human_conversations":human_conversations})
 
 
 @login_required

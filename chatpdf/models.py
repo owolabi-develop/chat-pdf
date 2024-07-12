@@ -30,8 +30,7 @@ class Summary(models.Model):
     summary = models.TextField()
     create_date = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self) -> str:
-        return str(self.summary)
+   
      
      
 
@@ -39,7 +38,8 @@ class Summary(models.Model):
 class ChatSessionConversation(models.Model):
     session = models.ForeignKey(ChatSession, on_delete=models.CASCADE)
     role = models.CharField(max_length=10)  # 'human' or 'ai'
-    content = models.TextField()
+    content = models.TextField(null=True, blank=True)
+    page_number = models.IntegerField(null=True, blank=True)
     create_date = models.DateTimeField(auto_now_add=True)
     
     def __str__(self) -> str:

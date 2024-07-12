@@ -14,44 +14,6 @@ function loadPdf_document() {
     const zoomInBtn = document.getElementById('zoom-in');
     const pdf_data_name = document.getElementById('pdf-data-name'); 
     
-//     /// check for any save pdf links on localstorage a render it back to navbar
-   
-//     pdf_urls =  localStorage.getItem('pdf_urls')
-//     if (pdf_urls && pdf_urls.length > 0){
-//         pdf_url = pdf_urls.split(',')
-    
-//         let pdfurl_content = ""
-//         for(let i=0; i < pdf_url.length; i++){
-//         console.log(pdf_url[i])
-//         pdfurl_content +=`
-//         <ul>
-//                 <li>
-//                 <div class="pdf_url_div" onclick="loadPDF('${pdf_url[i]}')">
-//                 ${pdf_url[i].replace('/media/','').slice(0,20)}</div>
-//                 </li>
-//         </ul>
-//         `
-//         }
-
-//     document.getElementById('pdf_url').innerHTML = pdfurl_content;
-   
-// }else{
-   
-// }
- // / check for any save pdf links on localstorage a render it back to navbar
-
-// // check for new _summary message in localstorage
-// if (localStorage.getItem('new_summary')){
-//     document.getElementById('chat-loader').style.display ="none";
-//     document.getElementById('bot-summary').style.display ="block";
-//     document.getElementById('bot-summary').innerHTML = localStorage.getItem('new_summary');
-// }else{
-//     document.getElementById('bot-summary').innerHTML = '';
-// }
-// // / check for new _summary message in localstorage 
-
-
-
     let pdfDoc = null;
     let scale = 1;
     let pageNum = 1;
@@ -84,16 +46,11 @@ function loadPdf_document() {
     }
 
     async function loadPDF(url) {
-        // claer previous content localstorage  
-        //sessionStorage.removeItem('pdfURL')
-
+        
         const loadingTask = pdfjsLib.getDocument(url);
         pdfDoc = await loadingTask.promise;
         await renderAllPages();
         pdf_data_name.textContent = url.replace('/media/','');
-
-        // // Store PDF URL in session
-        // localStorage.setItem('pdfURL', url);
     }
     window.loadPDF = loadPDF;
 
@@ -201,11 +158,13 @@ function retain_pdf_link_on_sidebar(pdf_url_name){
 
 /// bot typewriting effect function for initial summary
 function startTypewriterEffect(botResponse, elementId) {
+    console.log("res",botResponse)
     let index = 0; // Current character index
     const letterDelay = 5; // Base delay between each character in milliseconds
 
     function type() {
-      const currentText = botResponse.slice(0, index);
+      let currentText = botResponse.slice(0, index);
+      document.getElementById(elementId).style.display ="block";
       document.getElementById(elementId).textContent = currentText;
       index++;
 
@@ -310,10 +269,8 @@ $(document).ready(function() {
                 // document.getElementById('bot-summary').style.display ="block";
                
                  // handle pdf bot_summary initial message
-                startTypewriterEffect(new_summary, 'bot-summary');
+                startTypewriterEffect(pdf_bot_summary , 'bot-summary');
                
-                
-
                 // enable send message button
                 document.getElementById('message-btn').disabled = false
                 document.getElementById('message-btn').style.backgroundColor = "#1d67e6";
@@ -376,27 +333,28 @@ $(document).ready(function() {
                 document.getElementById('message-btn').disabled = false;
                 document.getElementById('message-btn').style.backgroundColor = "#1d67e6";
                 document.getElementById('message-btn').style.cursor = 'pointer';
-                console.log("bot",response['chat_history']);
                
-                //window.location.reload()
+            
                 // Handle success response
                
-                // bot_response_message_text = response['chat_history'][response['chat_history'].length - 1]['message']['text']
-                // bot_response_message_page = response['chat_history'][response['chat_history'].length - 1]['message']['page']
-              
-                // const newMessageId = `bot_response_message_${Date.now()}`;
-                // document.getElementById('chat-bot-reponse-holder').innerHTML +=`               
-                //          <div id="${newMessageId}" class="bot_Respone_message shadow p-3 mb-2 bg-body-tertiary rounded p-3 h-auto d-inline-block">
-                          
-                //         </div>
-                    
-                // `;
-                // bot_chat_response = ` <p>${bot_response_message_text}</p>
-                //    <div onclick="scroll_to_page('${bot_response_message_page}')" class="scroll_to_page style="width:auto;">
-                //     <p>${bot_response_message_page}</p>
-                //     </div>`
+                bot_response_message_text = response['chat_history']['ai']['text']
+                bot_response_message_page =  response['chat_history']['ai']['page']
 
-                // bot_startTypewriterEffect(bot_chat_response,newMessageId)
+                console.log("bots",bot_response_message_text)
+              
+                const newMessageId = `bot_response_message_${Date.now()}`;
+                document.getElementById('chat-bot-reponse-holder').innerHTML +=`               
+                         <div id="${newMessageId}" class="bot_Respone_message shadow p-3 mb-2 bg-body-tertiary rounded p-3 h-auto d-inline-block">
+                          
+                        </div>
+                    
+                `;
+                bot_chat_response = ` <p>${bot_response_message_text}</p>
+                   <div onclick="scroll_to_page('${bot_response_message_page}')" class="scroll_to_page style="width:auto;">
+                    <p>${bot_response_message_page}</p>
+                    </div>`
+
+                bot_startTypewriterEffect(bot_chat_response,newMessageId)
                    
             },
             error: function(xhr, status, error) {
